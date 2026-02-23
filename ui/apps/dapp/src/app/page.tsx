@@ -22,30 +22,55 @@ export default function Home() {
   }, [account, isShielding]);
 
   async function handleShield() {
-    if (typeof window !== "undefined" && !window.ethereum) return alert("Install Xverse or MetaMask!");
+    if (typeof window !== "undefined" && !window.ethereum) {
+      return alert("Please install Xverse or MetaMask!");
+    }
+
     try {
       setIsShielding(true);
+
+      // 1. FORCE AUTHORIZATION (Fixes Error 4100)
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      });
+      
+      const userAddress = accounts[0];
+      setAccount(userAddress);
+
+      // 2. INITIALIZE PROVIDER AFTER AUTH
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      setAccount(await signer.getAddress());
+      
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-      const tx = await contract.shieldSats({ value: ethers.parseEther("0.1") });
+
+      // 3. TRIGGER TRANSACTION
+      const tx = await contract.shieldSats({ 
+        value: ethers.parseEther("0.1") 
+      });
+
+      console.log("TX Sent:", tx.hash);
       await tx.wait();
+      
       setIsShielding(false);
-    } catch (err) {
-      console.error(err);
+      alert("Sats Shielded Successfully!");
+    } catch (err: any) {
+      console.error("Wallet Error:", err);
       setIsShielding(false);
+      
+      if (err.code === 4001) {
+        alert("Transaction rejected by user.");
+      } else {
+        alert(`Error: ${err.message || "Failed to connect wallet"}`);
+      }
     }
   }
 
   return (
     <main className="min-h-screen bg-[#020202] text-amber-50 font-sans p-4 md:p-12 flex flex-col items-center">
-      {/* Cinematic Background */}
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,_#1a1200_0%,_#020202_100%)] -z-10" />
       <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none -z-10" />
 
       <div className="max-w-5xl w-full space-y-8">
-        {/* Top Header */}
         <div className="flex justify-between items-center border-b border-amber-900/30 pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-amber-500 p-2 rounded-lg">
@@ -62,7 +87,6 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: The Vault */}
           <div className="lg:col-span-8 space-y-8">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -87,7 +111,6 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Stats Row */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-3xl">
                 <Timer className="text-amber-500 mb-3" size={20} />
@@ -102,7 +125,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Column: Leaderboard */}
           <div className="lg:col-span-4 bg-zinc-900/30 border border-zinc-800/50 p-8 rounded-[2.5rem] backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-8 border-b border-zinc-800 pb-4">
               <Trophy className="text-amber-500" size={20} />
@@ -122,11 +144,6 @@ export default function Home() {
                   <span className="font-mono text-xs">{user.score}</span>
                 </div>
               ))}
-            </div>
-            <div className="mt-12 pt-6 border-t border-zinc-800">
-              <p className="text-[10px] text-zinc-600 leading-relaxed italic">
-                * Reputation is calculated via ZK-Proof on Midl L2. Your total wallet balance remains private.
-              </p>
             </div>
           </div>
         </div>
