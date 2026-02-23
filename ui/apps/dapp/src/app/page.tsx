@@ -4,6 +4,13 @@ import { ethers } from 'ethers';
 import { Shield, Trophy, Timer, Activity, Lock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// This bypasses the TypeScript error for window.ethereum during the build
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const ABI = ["function shieldSats() public payable", "function amounts(address) public view returns (uint256)"];
 
@@ -21,7 +28,7 @@ export default function Home() {
   }, [account, isShielding]);
 
   async function handleShield() {
-    if (!window.ethereum) return alert("Install a wallet!");
+    if (typeof window !== "undefined" && !window.ethereum) return alert("Install a wallet!");
     try {
       setIsShielding(true);
       const provider = new ethers.BrowserProvider(window.ethereum);
