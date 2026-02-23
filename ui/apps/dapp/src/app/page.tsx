@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { Shield, Trophy, Timer, activity, Lock, Zap } from 'lucide-react';
+import { Shield, Trophy, Timer, Activity, Lock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
