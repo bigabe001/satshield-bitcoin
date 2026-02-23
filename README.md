@@ -40,7 +40,7 @@ Confirmed the deployment at the protocol level.
 **Contract Address:** `0x5FbDB2315678afecb367f032d93F642f64180aa3`  
 **RPC Verification:** Verified via raw JSON-RPC `eth_getCode` call, returning full bytecode on the Midl-compatible node.
 
-![Deployment Proof](./deployment_proof.png)
+![Deployment Proof](./deplyment_proof.png)
 *Above: Raw bytecode verification confirming the SatShield contract is live on the Midl-compatible RPC.*
 
 ---
